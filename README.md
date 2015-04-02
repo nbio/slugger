@@ -1,6 +1,6 @@
 # slugger
 
-Build and deploy [Heroku](https://heroku.com) slugs locally—handy for deploying single-binary [Go](https://golang.org) web applications.
+Build and deploy [Heroku](https://heroku.com) slugs on your local machine. Handy for deploying single-binary [Go](https://golang.org) web applications.
 
 ## Usage
 
