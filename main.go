@@ -16,6 +16,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+var nameMatch = regexp.MustCompile(`\bname=([^\n]+)`)
+
 func main() {
 	var app, user, pass, token, procFile, slugFile string
 	flag.StringVar(&app, "app", "", "Heroku app name")
@@ -26,7 +28,7 @@ func main() {
 	flag.StringVar(&slugFile, "slug", "slug.tgz", "path to slug file")
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, `Usage: %s [arguments]
-			
+
 Slugger deploys a pre-built slug file to Heroku. It will attempt to
 automatically determine the correct Heroku app and authentication
 information from the heroku command and current directory.
@@ -50,12 +52,10 @@ Available arguments:
 		app = os.Getenv("HEROKU_APP")
 	}
 	if app == "" {
-		out, err := exec.Command("heroku", "info").Output()
+		out, err := exec.Command("heroku", "info", "--shell").Output()
 		if err == nil {
-			re := regexp.MustCompile(`=== (\S+)`)
-			m := re.FindStringSubmatch(string(out))
-			if len(m) == 2 {
-				app = m[1]
+			if matches := nameMatch.FindSubmatch(out); len(matches) > 1 {
+				app = string(matches[1])
 			}
 		}
 	}
