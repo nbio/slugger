@@ -52,11 +52,14 @@ Available arguments:
 		app = os.Getenv("HEROKU_APP")
 	}
 	if app == "" {
-		out, err := exec.Command("heroku", "info", "--shell").Output()
-		if err == nil {
-			if matches := nameMatch.FindSubmatch(out); len(matches) > 1 {
-				app = string(matches[1])
-			}
+		cmd := exec.Command("heroku", "info", "--shell")
+		out, err := cmd.Output()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Unable to determine app name: `%s': %v\n\n", strings.Join(cmd.Args, " "), err)
+			os.Exit(2)
+		}
+		if matches := nameMatch.FindSubmatch(out); len(matches) > 1 {
+			app = string(matches[1])
 		}
 	}
 	if app == "" {
@@ -74,12 +77,16 @@ Available arguments:
 		token = os.Getenv("HEROKU_TOKEN")
 	}
 	if token == "" {
-		out, err := exec.Command("heroku", "auth:token").Output()
-		if err == nil {
-			token = strings.TrimSpace(string(out))
+		cmd := exec.Command("heroku", "auth:token")
+		out, err := cmd.Output()
+		if err != nil && user == "" && password == "" {
+			fmt.Fprintf(os.Stderr, "Unable to determine credentials: `%s': %v\n\n", strings.Join(cmd.Args, " "), err)
+			os.Exit(2)
 		}
+		token = strings.TrimSpace(string(out))
 	}
 	if user == "" && pass == "" && token == "" {
+		fmt.Fprintf(os.Stderr, "Unable to determine credentials.\n\n")
 		flag.Usage()
 	}
 
