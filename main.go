@@ -79,7 +79,7 @@ Available arguments:
 	if token == "" {
 		cmd := exec.Command("heroku", "auth:token")
 		out, err := cmd.Output()
-		if err != nil && user == "" && password == "" {
+		if err != nil && user == "" && pass == "" {
 			fmt.Fprintf(os.Stderr, "Unable to determine credentials: `%s': %v\n\n", strings.Join(cmd.Args, " "), err)
 			os.Exit(2)
 		}
