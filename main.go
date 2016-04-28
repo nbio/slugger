@@ -29,6 +29,7 @@ func main() {
 	flag.StringVar(&release, "release", "", "`id` of release to deploy directly to app")
 	flag.StringVar(&commit, "commit", "", "`SHA` of commit in slug")
 	dryRun := flag.Bool("n", false, "dry run; skip slug upload and release")
+	verbose := flag.Bool("v", false, "dump raw requests and responses from Heroku client")
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, `Usage: %s [arguments]
 
@@ -99,7 +100,7 @@ Available arguments:
 	}
 
 	// Initialize Heroku client
-	c := heroku.Client{Username: user, Password: pass}
+	c := heroku.Client{Username: user, Password: pass, Debug: *verbose}
 	if token != "" {
 		c.AdditionalHeaders = http.Header{"Authorization": {"Bearer " + token}}
 	}
