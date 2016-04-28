@@ -149,14 +149,13 @@ Available arguments:
 		if err != nil {
 			log.Fatal(err)
 		}
+		log.Println("Uploading slug: ", humanize.Bytes(uint64(slugSize)))
 
 		// Put slug data
-		log.Println("Uploading slug: ", humanize.Bytes(uint64(slugSize)))
 		if _, err := f.Seek(0, os.SEEK_SET); err != nil {
 			errlog.Fatal(err)
 		}
-		meth := strings.ToUpper(slug.Blob.Method)
-		req, err := http.NewRequest(meth, slug.Blob.URL, f)
+		req, err := http.NewRequest(strings.ToUpper(slug.Blob.Method), slug.Blob.URL, f)
 		if err != nil {
 			errlog.Fatal(err)
 		}
@@ -172,6 +171,7 @@ Available arguments:
 
 	if !*dryRun {
 		// Release built slug to app
+		log.Println("Releasing slug: ", release)
 		rel, err := c.ReleaseCreate(app, release, nil)
 		if err != nil {
 			errlog.Fatal(err)
