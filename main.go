@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -156,7 +157,8 @@ Available arguments:
 		if _, err := f.Seek(0, os.SEEK_SET); err != nil {
 			errlog.Fatal(err)
 		}
-		req, err := http.NewRequest(strings.ToUpper(slug.Blob.Method), slug.Blob.URL, f)
+		slugBytes, err := ioutil.ReadAll(f)
+		req, err := http.NewRequest(strings.ToUpper(slug.Blob.Method), slug.Blob.URL, bytes.NewReader(slugBytes))
 		if err != nil {
 			errlog.Fatal(err)
 		}
