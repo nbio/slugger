@@ -27,7 +27,7 @@ func main() {
 	flag.StringVar(&token, "token", "", "Heroku API token")
 	flag.StringVar(&procFile, "procfile", "Procfile", "`path` to Procfile")
 	flag.StringVar(&slugFile, "slug", "slug.tgz", "`path` to slug TAR GZIP file")
-	flag.StringVar(&release, "release", "", "`id` of release to deploy directly to app")
+	flag.StringVar(&release, "release", "", "`slug_id` to release directly to app")
 	flag.StringVar(&commit, "commit", "", "`SHA` of commit in slug")
 	noRelease := flag.Bool("no-release", false, "only upload slug, do not release")
 	dryRun := flag.Bool("n", false, "dry run; skip slug upload and release")
@@ -46,8 +46,9 @@ To create a slug from an app directory (./app prefix is required):
 For more information on Heroku and how to create a slug, visit:
 https://devcenter.heroku.com/articles/platform-api-deploying-slugs
 
-Using the -release flag, slugger can deploy to multiple apps in the
-same region with a single upload.
+Using the -no-release flag, slugger can prepare a slug for deploy
+without releasing it to an app. Running slugger again with the
+-release flag, you can deploy the slug, by ID, to multiple apps.
 
 Available arguments:
 `, os.Args[0])
