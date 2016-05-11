@@ -29,6 +29,7 @@ func main() {
 	flag.StringVar(&slugFile, "slug", "slug.tgz", "`path` to slug TAR GZIP file")
 	flag.StringVar(&release, "release", "", "`id` of release to deploy directly to app")
 	flag.StringVar(&commit, "commit", "", "`SHA` of commit in slug")
+	noRelease := flag.Bool("no-release", false, "only upload slug, do not release")
 	dryRun := flag.Bool("n", false, "dry run; skip slug upload and release")
 	verbose := flag.Bool("v", false, "dump raw requests and responses from Heroku client")
 	flag.Usage = func() {
@@ -172,7 +173,7 @@ Available arguments:
 		release = slug.Id
 	}
 
-	if !*dryRun {
+	if !(*dryRun || *noRelease) {
 		// Release built slug to app
 		log.Println("Releasing slug: ", release)
 		rel, err := c.ReleaseCreate(app, release, nil)
