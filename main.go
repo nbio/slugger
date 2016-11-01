@@ -1,9 +1,9 @@
 package main
 
 import (
-	"bytes"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -76,6 +76,7 @@ Available arguments:
 	}
 	if app == "" {
 		flag.Usage()
+		errlog.Fatalf("Unable to determine app name from command line: %s", strings.Join(os.Args, " "))
 	}
 	log.Println("App: ", app)
 
@@ -115,11 +116,11 @@ Available arguments:
 		if err != nil {
 			errlog.Fatal(err)
 		}
-		procBytes, err := ioutil.ReadAll(f)
-		f.Close()
+		procBytes, err := ioutil.ReadAll(io.LimitReader(f, 1<<20)) // Limit ReadAll to 1MB
 		if err != nil {
 			errlog.Fatal(err)
 		}
+		f.Close() // OK to ignore error from read-only file usage
 		var processTypes map[string]string
 		err = yaml.Unmarshal(procBytes, &processTypes)
 		if err != nil {
@@ -128,12 +129,12 @@ Available arguments:
 		procText := strings.Replace(strings.TrimSpace(string(procBytes)), "\n", "\n\t", -1)
 		log.Println("Processes: ", procText)
 
-		// Open the slug file
+		// Open the slug file for reading
 		f, err = os.Open(slugFile)
 		if err != nil {
 			errlog.Fatal(err)
 		}
-		defer f.Close()
+		defer f.Close() // OK to ignore error from read-only file usage
 		log.Println("Slug file: ", slugFile)
 
 		if commit == "" {
@@ -144,30 +145,26 @@ Available arguments:
 		}
 		log.Println("Commit: ", commit)
 
-		// Create a slug
+		// Create a slug at Heroku
 		slug, err := c.SlugCreate(app, processTypes, &heroku.SlugCreateOpts{Commit: &commit})
 		if err != nil {
 			errlog.Fatal(err)
 		}
-		slugSize, err := f.Seek(0, os.SEEK_END)
+		stat, err := f.Stat()
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Println("Uploading slug: ", humanize.Bytes(uint64(slugSize)))
+		log.Println("Uploading slug: ", humanize.Bytes(uint64(stat.Size())))
 
 		// Put slug data
-		if _, err := f.Seek(0, os.SEEK_SET); err != nil {
-			errlog.Fatal(err)
-		}
-		slugBytes, err := ioutil.ReadAll(f)
-		req, err := http.NewRequest(strings.ToUpper(slug.Blob.Method), slug.Blob.URL, bytes.NewReader(slugBytes))
+		req, err := http.NewRequest(strings.ToUpper(slug.Blob.Method), slug.Blob.URL, f)
 		if err != nil {
 			errlog.Fatal(err)
 		}
 		if *dryRun {
 			log.Println("Upload skipped (dry run)")
 		} else {
-			if _, err := http.DefaultClient.Do(req); err != nil {
+			if _, err = http.DefaultClient.Do(req); err != nil {
 				errlog.Fatal(err)
 			}
 		}
