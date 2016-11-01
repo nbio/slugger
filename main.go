@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/http/httputil"
 	"os"
 	"os/exec"
 	"regexp"
@@ -157,16 +158,31 @@ Available arguments:
 		log.Println("Uploading slug: ", humanize.Bytes(uint64(stat.Size())))
 
 		// Put slug data
-		req, err := http.NewRequest(strings.ToUpper(slug.Blob.Method), slug.Blob.URL, f)
+		req, err := http.NewRequest(http.MethodPut, slug.Blob.URL, f)
 		if err != nil {
 			errlog.Fatal(err)
 		}
 		if *dryRun {
 			log.Println("Upload skipped (dry run)")
 		} else {
-			if _, err = http.DefaultClient.Do(req); err != nil {
+			req.Header.Set("Content-Type", "")
+			if *verbose {
+				dump, err := httputil.DumpRequestOut(req, false) // don't dump large body
+				if err != nil {
+					errlog.Fatalf("debug: %s", err)
+				} else {
+					os.Stderr.Write(dump)
+					os.Stderr.Write([]byte{'\n', '\n'})
+				}
+			}
+			resp, err := http.DefaultClient.Do(req)
+			if err != nil {
 				errlog.Fatalf("upload: %s", err)
 			}
+			if resp.StatusCode > 201 {
+				errlog.Fatalf("upload: %s", resp.Status)
+			}
+			resp.Body.Close()
 		}
 		release = slug.Id
 	}
