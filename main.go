@@ -148,11 +148,11 @@ Available arguments:
 		// Create a slug at Heroku
 		slug, err := c.SlugCreate(app, processTypes, &heroku.SlugCreateOpts{Commit: &commit})
 		if err != nil {
-			errlog.Fatal(err)
+			errlog.Fatalf("slug: %s", err)
 		}
 		stat, err := f.Stat()
 		if err != nil {
-			log.Fatal(err)
+			errlog.Fatal(err)
 		}
 		log.Println("Uploading slug: ", humanize.Bytes(uint64(stat.Size())))
 
@@ -165,7 +165,7 @@ Available arguments:
 			log.Println("Upload skipped (dry run)")
 		} else {
 			if _, err = http.DefaultClient.Do(req); err != nil {
-				errlog.Fatal(err)
+				errlog.Fatalf("upload: %s", err)
 			}
 		}
 		release = slug.Id
@@ -176,7 +176,7 @@ Available arguments:
 		log.Println("Releasing slug: ", release)
 		rel, err := c.ReleaseCreate(app, release, nil)
 		if err != nil {
-			errlog.Fatal(err)
+			errlog.Fatalf("release: %s", err)
 		}
 		log.Println("Deployed version: ", rel.Version)
 	}
