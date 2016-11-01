@@ -166,6 +166,7 @@ Available arguments:
 			log.Println("Upload skipped (dry run)")
 		} else {
 			req.Header.Set("Content-Type", "")
+			req.ContentLength = stat.Size()
 			if *verbose {
 				dump, err := httputil.DumpRequestOut(req, false) // don't dump large body
 				if err != nil {
