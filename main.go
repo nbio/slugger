@@ -21,7 +21,7 @@ import (
 var nameMatch = regexp.MustCompile(`\bname=([^\n]+)`)
 
 func main() {
-	var app, user, pass, token, procFile, slugFile, release, commit string
+	var app, user, pass, token, procFile, slugFile, release, commit, langDesc string
 	flag.StringVar(&app, "app", "", "Heroku app `name`")
 	flag.StringVar(&user, "user", "", "Heroku `username`")
 	flag.StringVar(&pass, "password", "", "Heroku password")
@@ -30,6 +30,7 @@ func main() {
 	flag.StringVar(&slugFile, "slug", "slug.tgz", "`path` to slug TAR GZIP file")
 	flag.StringVar(&release, "release", "", "`slug_id` to release directly to app")
 	flag.StringVar(&commit, "commit", "", "`SHA` of commit in slug")
+	flag.StringVar(&langDesc, "lang-desc", "", "the language description of this slug")
 	noRelease := flag.Bool("no-release", false, "only upload slug, do not release")
 	dryRun := flag.Bool("n", false, "dry run; skip slug upload and release")
 	verbose := flag.Bool("v", false, "dump raw requests and responses from Heroku client")
@@ -50,6 +51,11 @@ https://devcenter.heroku.com/articles/platform-api-deploying-slugs
 Using the -no-release flag, slugger can prepare a slug for deploy
 without releasing it to an app. Running slugger again with the
 -release flag, you can deploy the slug, by ID, to multiple apps.
+
+With the -lang-desc flag, please try to match the output of
+bin/detect for the buildpack you use. You can find this out by
+opening the source for the relevant buildpack and looking at
+bin/detect. For Go you will want to set "Go", etc.
 
 Available arguments:
 `, os.Args[0])
@@ -146,8 +152,15 @@ Available arguments:
 		}
 		log.Println("Commit: ", commit)
 
+		if langDesc != "" {
+			log.Println("Language Description: ", langDesc)
+		}
+
 		// Create a slug at Heroku
-		slug, err := c.SlugCreate(app, processTypes, &heroku.SlugCreateOpts{Commit: &commit})
+		slug, err := c.SlugCreate(app, processTypes, &heroku.SlugCreateOpts{
+			Commit: &commit,
+			BuildpackProvidedDescription: &langDesc,
+		})
 		if err != nil {
 			errlog.Fatalf("slug: %s", err)
 		}
