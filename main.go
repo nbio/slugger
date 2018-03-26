@@ -27,6 +27,7 @@ func main() {
 	flag.StringVar(&user, "user", "", "Heroku `username`")
 	flag.StringVar(&pass, "password", "", "Heroku password")
 	flag.StringVar(&token, "token", "", "Heroku API token")
+	stack := flag.String("stack", "", "Heroku stack (e.g. cedar-14 or heroku-16)") // Intentionally a pointer
 	flag.StringVar(&procFile, "procfile", "Procfile", "`path` to Procfile")
 	flag.StringVar(&slugFile, "slug", "slug.tgz", "`path` to slug TAR GZIP file")
 	flag.StringVar(&release, "release", "", "`slug_id` to release directly to app")
@@ -161,8 +162,13 @@ Available arguments:
 			log.Println("Language Description: ", langDesc)
 		}
 
+		if stack != nil {
+			log.Println("Stack:", *stack)
+		}
+
 		// Create a slug at Heroku
 		slug, err := svc.SlugCreate(context.TODO(), app, heroku.SlugCreateOpts{
+			Stack:        stack,
 			ProcessTypes: processTypes,
 			Commit:       &commit,
 			BuildpackProvidedDescription: &langDesc,
