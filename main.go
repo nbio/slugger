@@ -22,12 +22,12 @@ import (
 var nameMatch = regexp.MustCompile(`\bname=([^\n]+)`)
 
 func main() {
-	var app, user, pass, token, procFile, slugFile, release, commit, langDesc string
+	var app, user, pass, token, stack, procFile, slugFile, release, commit, langDesc string
 	flag.StringVar(&app, "app", "", "Heroku app `name`")
 	flag.StringVar(&user, "user", "", "Heroku `username`")
 	flag.StringVar(&pass, "password", "", "Heroku password")
 	flag.StringVar(&token, "token", "", "Heroku API token")
-	stack := flag.String("stack", "", "Heroku stack (e.g. cedar-14 or heroku-16)") // Intentionally a pointer
+	flag.StringVar(&stack, "stack", "", "Heroku stack (e.g. cedar-14 or heroku-16)")
 	flag.StringVar(&procFile, "procfile", "Procfile", "`path` to Procfile")
 	flag.StringVar(&slugFile, "slug", "slug.tgz", "`path` to slug TAR GZIP file")
 	flag.StringVar(&release, "release", "", "`slug_id` to release directly to app")
@@ -162,13 +162,15 @@ Available arguments:
 			log.Println("Language Description: ", langDesc)
 		}
 
-		if stack != nil {
-			log.Println("Stack:", *stack)
+		var stackp *string
+		if stack != "" {
+			stackp = &stack
+			log.Println("Stack:", stack)
 		}
 
 		// Create a slug at Heroku
 		slug, err := svc.SlugCreate(context.TODO(), app, heroku.SlugCreateOpts{
-			Stack:        stack,
+			Stack:        stackp, // For JSON omitempty
 			ProcessTypes: processTypes,
 			Commit:       &commit,
 			BuildpackProvidedDescription: &langDesc,
