@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"io"
@@ -13,7 +14,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/bgentry/heroku-go"
+	"github.com/cyberdelia/heroku-go/v3"
 	"github.com/dustin/go-humanize"
 	"gopkg.in/yaml.v2"
 )
@@ -110,11 +111,15 @@ Available arguments:
 		flag.Usage()
 	}
 
-	// Initialize Heroku client
-	c := heroku.Client{Username: user, Password: pass, Debug: *verbose}
-	if token != "" {
-		c.AdditionalHeaders = http.Header{"Authorization": {"Bearer " + token}}
+	// Initialize Heroku service
+	transport := &heroku.Transport{
+		Username: user,
+		Password: pass,
 	}
+	if token != "" {
+		transport.AdditionalHeaders = http.Header{"Authorization": {"Bearer " + token}}
+	}
+	svc := heroku.NewService(&http.Client{Transport: transport})
 
 	// Read slug and upload if release isn't known
 	if release == "" {
@@ -157,8 +162,9 @@ Available arguments:
 		}
 
 		// Create a slug at Heroku
-		slug, err := c.SlugCreate(app, processTypes, &heroku.SlugCreateOpts{
-			Commit: &commit,
+		slug, err := svc.SlugCreate(context.TODO(), app, heroku.SlugCreateOpts{
+			ProcessTypes: processTypes,
+			Commit:       &commit,
 			BuildpackProvidedDescription: &langDesc,
 		})
 		if err != nil {
@@ -198,13 +204,16 @@ Available arguments:
 			}
 			resp.Body.Close()
 		}
-		release = slug.Id
+		release = slug.ID
 	}
 
 	if !(*dryRun || *noRelease) {
 		// Release built slug to app
 		log.Println("Releasing slug: ", release)
-		rel, err := c.ReleaseCreate(app, release, nil)
+		rel, err := svc.ReleaseCreate(context.TODO(), app, heroku.ReleaseCreateOpts{
+			Slug:        release,
+			Description: &langDesc,
+		})
 		if err != nil {
 			errlog.Fatalf("release: %s", err)
 		}
