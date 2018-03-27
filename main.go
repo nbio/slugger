@@ -219,8 +219,7 @@ Available arguments:
 		// Release built slug to app
 		log.Println("Releasing slug: ", release)
 		rel, err := svc.ReleaseCreate(context.TODO(), app, heroku.ReleaseCreateOpts{
-			Slug:        release,
-			Description: &langDesc,
+			Slug: release,
 		})
 		if err != nil {
 			errlog.Fatalf("release: %s", err)
