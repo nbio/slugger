@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -36,6 +37,7 @@ func main() {
 	noRelease := flag.Bool("no-release", false, "only upload slug, do not release")
 	dryRun := flag.Bool("n", false, "dry run; skip slug upload and release")
 	verbose := flag.Bool("v", false, "dump raw requests and responses from Heroku client")
+	info := flag.Bool("info", false, "show remote information about uploaded slug")
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, `Usage: %s [arguments]
 
@@ -68,6 +70,10 @@ Available arguments:
 	errlog := log.New(os.Stderr, "", log.Lshortfile)
 	log.SetFlags(0)
 	log.SetOutput(os.Stderr)
+
+	if *info && release == "" {
+		errlog.Fatal("use of -info requires use of -release")
+	}
 
 	// Get app name
 	if app == "" {
@@ -215,7 +221,18 @@ Available arguments:
 		release = slug.ID
 	}
 
-	if !(*dryRun || *noRelease) {
+	if *info {
+		slug, err := svc.SlugInfo(context.TODO(), app, release)
+		if err != nil {
+			errlog.Fatalf("slug[%s]: %s", release, err)
+		}
+		b, err := json.MarshalIndent(slug, "", "  ")
+		if err != nil {
+			errlog.Fatalf("JSON from slug(%q): %s", slug.ID, err)
+		}
+		log.Printf("JSON:\n%s\n", b)
+
+	} else if !(*dryRun || *noRelease) {
 		// Release built slug to app
 		log.Println("Releasing slug: ", release)
 		rel, err := svc.ReleaseCreate(context.TODO(), app, heroku.ReleaseCreateOpts{
