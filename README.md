@@ -33,6 +33,6 @@ golang
 
 ## About
 
-Slugger uses the fantastic [Heroku API client for Go](https://github.com/bgentry/heroku-go) by [Blake Gentry](https://github.com/bgentry). Extracted from and used in production at [domainr.com](https://domainr.com).
+Slugger uses the fantastic [heroku-go/v3](https://github.com/cyberdelia/heroku-go) API client by [Timothée Peignier](https://github.com/cyberdelia). Extracted from and used in production at [domainr.com](https://domainr.com).
 
-© 2015 nb.io, LLC
+© 2015–2018 nb.io, LLC

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"io"
@@ -13,7 +14,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/bgentry/heroku-go"
+	"github.com/cyberdelia/heroku-go/v3"
 	"github.com/dustin/go-humanize"
 	"gopkg.in/yaml.v2"
 )
@@ -21,11 +22,12 @@ import (
 var nameMatch = regexp.MustCompile(`\bname=([^\n]+)`)
 
 func main() {
-	var app, user, pass, token, procFile, slugFile, release, commit, langDesc string
+	var app, user, pass, token, stack, procFile, slugFile, release, commit, langDesc string
 	flag.StringVar(&app, "app", "", "Heroku app `name`")
 	flag.StringVar(&user, "user", "", "Heroku `username`")
 	flag.StringVar(&pass, "password", "", "Heroku password")
 	flag.StringVar(&token, "token", "", "Heroku API token")
+	flag.StringVar(&stack, "stack", "", "Heroku stack (e.g. cedar-14 or heroku-16)")
 	flag.StringVar(&procFile, "procfile", "Procfile", "`path` to Procfile")
 	flag.StringVar(&slugFile, "slug", "slug.tgz", "`path` to slug TAR GZIP file")
 	flag.StringVar(&release, "release", "", "`slug_id` to release directly to app")
@@ -110,11 +112,15 @@ Available arguments:
 		flag.Usage()
 	}
 
-	// Initialize Heroku client
-	c := heroku.Client{Username: user, Password: pass, Debug: *verbose}
-	if token != "" {
-		c.AdditionalHeaders = http.Header{"Authorization": {"Bearer " + token}}
+	// Initialize Heroku service
+	transport := &heroku.Transport{
+		Username: user,
+		Password: pass,
 	}
+	if token != "" {
+		transport.AdditionalHeaders = http.Header{"Authorization": {"Bearer " + token}}
+	}
+	svc := heroku.NewService(&http.Client{Transport: transport})
 
 	// Read slug and upload if release isn't known
 	if release == "" {
@@ -156,9 +162,17 @@ Available arguments:
 			log.Println("Language Description: ", langDesc)
 		}
 
+		var stackp *string
+		if stack != "" {
+			stackp = &stack
+			log.Println("Stack:", stack)
+		}
+
 		// Create a slug at Heroku
-		slug, err := c.SlugCreate(app, processTypes, &heroku.SlugCreateOpts{
-			Commit: &commit,
+		slug, err := svc.SlugCreate(context.TODO(), app, heroku.SlugCreateOpts{
+			Stack:        stackp, // For JSON omitempty
+			ProcessTypes: processTypes,
+			Commit:       &commit,
 			BuildpackProvidedDescription: &langDesc,
 		})
 		if err != nil {
@@ -198,13 +212,16 @@ Available arguments:
 			}
 			resp.Body.Close()
 		}
-		release = slug.Id
+		release = slug.ID
 	}
 
 	if !(*dryRun || *noRelease) {
 		// Release built slug to app
 		log.Println("Releasing slug: ", release)
-		rel, err := c.ReleaseCreate(app, release, nil)
+		rel, err := svc.ReleaseCreate(context.TODO(), app, heroku.ReleaseCreateOpts{
+			Slug:        release,
+			Description: &langDesc,
+		})
 		if err != nil {
 			errlog.Fatalf("release: %s", err)
 		}
