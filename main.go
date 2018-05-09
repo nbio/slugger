@@ -32,12 +32,13 @@ func main() {
 	flag.StringVar(&procFile, "procfile", "Procfile", "`path` to Procfile")
 	flag.StringVar(&slugFile, "slug", "slug.tgz", "`path` to slug TAR GZIP file")
 	flag.StringVar(&release, "release", "", "`slug_id` to release directly to app")
-	flag.StringVar(&commit, "commit", "", "`SHA` of commit in slug")
+	flag.StringVar(&commit, "commit", "", "provide `SHA` of commit in slug")
 	flag.StringVar(&langDesc, "lang-desc", "", "the language description of this slug")
 	noRelease := flag.Bool("no-release", false, "only upload slug, do not release")
 	dryRun := flag.Bool("n", false, "dry run; skip slug upload and release")
 	verbose := flag.Bool("v", false, "dump raw requests and responses from Heroku client")
 	info := flag.Bool("info", false, "show remote information about uploaded slug")
+	commitOnly := flag.Bool("commit-only", false, "show only commit SHA with -info")
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, `Usage: %s [arguments]
 
@@ -230,7 +231,12 @@ Available arguments:
 		if err != nil {
 			errlog.Fatalf("JSON from slug(%q): %s", slug.ID, err)
 		}
-		log.Printf("JSON:\n%s\n", b)
+		if *commitOnly {
+			fmt.Println(*slug.Commit)
+			return
+		}
+		os.Stdout.Write(b)
+		return
 
 	} else if !(*dryRun || *noRelease) {
 		// Release built slug to app
