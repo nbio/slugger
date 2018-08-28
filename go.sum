@@ -1,0 +1,12 @@
+github.com/cyberdelia/heroku-go v0.0.0-20180803223120-ef2912d2324c h1:OxJmm1avh4Zv9NuD7yI/7lBe+++7RIM0PQYYyfmR4+Y=
+github.com/cyberdelia/heroku-go v0.0.0-20180803223120-ef2912d2324c/go.mod h1:I4Guak46PFjNJPgaTzZaCsuj7EAAjkkz9TNwtmISyFo=
+github.com/dustin/go-humanize v0.0.0-20180713052910-9f541cc9db5d h1:lDrio3iIdNb0Gw9CgH7cQF+iuB5mOOjdJ9ERNJCBgb4=
+github.com/dustin/go-humanize v0.0.0-20180713052910-9f541cc9db5d/go.mod h1:HtrtbFcZ19U5GC7JDqmcUSB87Iq5E25KnS6fMYU6eOk=
+github.com/google/go-querystring v0.0.0-20170111101155-53e6ce116135 h1:zLTLjkaOFEFIOxY5BWLFLwh+cL8vOBW4XJ2aqLE/Tf0=
+github.com/google/go-querystring v0.0.0-20170111101155-53e6ce116135/go.mod h1:odCYkC5MyYFN7vkCjXpyrEuKhc/BUO6wN/zVPAxq5ck=
+github.com/pborman/uuid v0.0.0-20180827223501-4c1ecd6722e8 h1:1ugHtU31mw8H2BNoNjyC6DmLJXnHSlVXOyzpV1/4xGA=
+github.com/pborman/uuid v0.0.0-20180827223501-4c1ecd6722e8/go.mod h1:VyrYX9gd7irzKovcSS6BIIEwPRkP2Wm2m9ufcdFSJ34=
+gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
+gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
+gopkg.in/yaml.v2 v2.2.1 h1:mUhvW9EsL+naU5Q3cakzfE91YhliOondGd6ZrsDBHQE=
+gopkg.in/yaml.v2 v2.2.1/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
