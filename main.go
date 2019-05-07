@@ -15,7 +15,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/cyberdelia/heroku-go/v3"
+	"github.com/cyberdelia/heroku-go"
 	"github.com/dustin/go-humanize"
 	"gopkg.in/yaml.v2"
 )
