@@ -15,8 +15,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/cyberdelia/heroku-go"
 	"github.com/dustin/go-humanize"
+	heroku "github.com/heroku/heroku-go/v5"
 	"gopkg.in/yaml.v2"
 )
 
@@ -177,9 +177,9 @@ Available arguments:
 
 		// Create a slug at Heroku
 		slug, err := svc.SlugCreate(context.TODO(), app, heroku.SlugCreateOpts{
-			Stack:        stackp, // For JSON omitempty
-			ProcessTypes: processTypes,
-			Commit:       &commit,
+			Stack:                        stackp, // For JSON omitempty
+			ProcessTypes:                 processTypes,
+			Commit:                       &commit,
 			BuildpackProvidedDescription: &langDesc,
 		})
 		if err != nil {
