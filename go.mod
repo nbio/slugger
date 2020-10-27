@@ -1,5 +1,7 @@
 module github.com/nbio/slugger
 
+go 1.15
+
 require (
 	github.com/dustin/go-humanize v1.0.0
 	github.com/google/uuid v1.1.1 // indirect
