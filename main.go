@@ -104,6 +104,9 @@ Available arguments:
 		pass = os.Getenv("HEROKU_PASSWORD")
 	}
 	if token == "" {
+		token = os.Getenv("HEROKU_API_KEY")
+	}
+	if token == "" {
 		token = os.Getenv("HEROKU_TOKEN")
 	}
 	if token == "" {
