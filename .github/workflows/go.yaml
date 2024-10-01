@@ -1,0 +1,33 @@
+name: Go
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch: # Enables the web UI manual trigger
+
+jobs:         
+  test:
+    name: Test
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4.2.0
+        with:
+          submodules: recursive
+
+      - name: Set up Go
+        uses: actions/setup-go@v5.0.2
+        with:
+          go-version: ^1
+
+      - name: Vet Go code
+        run: go vet ./...
+
+      - name: govulncheck
+        uses: golang/govulncheck-action@v1.0.3
+        with:
+          cache: false
+          repo-checkout: false
